@@ -1,4 +1,4 @@
--- ⚡ INSTANT OPTION1 CLICK BYPASS
+-- 🎮 GACHA SHOP ACCESS TOOL
 -- ⚠️ FOR EDUCATIONAL PURPOSES ONLY
 
 local Players = game:GetService("Players")
@@ -7,24 +7,24 @@ local CoreGui = game:GetService("CoreGui")
 
 -- تنظيف
 for _, gui in pairs(CoreGui:GetChildren()) do
-    if gui.Name == "InstantClick" then
+    if gui.Name == "GachaAccess" then
         gui:Destroy()
     end
 end
 
--- واجهة
+-- واجهة صغيرة
 local gui = Instance.new("ScreenGui")
-gui.Name = "InstantClick"
+gui.Name = "GachaAccess"
 gui.Parent = CoreGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 200, 0, 180)
+frame.Size = UDim2.new(0, 200, 0, 200)
 frame.Position = UDim2.new(0.1, 0, 0.3, 0)
 frame.BackgroundColor3 = Color3.fromRGB(50, 60, 80)
 frame.BorderSizePixel = 0
 frame.Parent = gui
 
--- تحريك
+-- تحريك بالإصبع
 local dragging = false
 local dragStart, startPos
 
@@ -55,41 +55,63 @@ frame.InputChanged:Connect(function(input)
 end)
 
 local title = Instance.new("TextLabel")
-title.Text = "⚡ INSTANT CLICK (اسحبني)"
+title.Text = "🎮 GACHA ACCESS (اسحبني)"
 title.Size = UDim2.new(1, 0, 0, 25)
-title.BackgroundColor3 = Color3.fromRGB(200, 100, 0)
+title.BackgroundColor3 = Color3.fromRGB(150, 50, 200)
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.SourceSansBold
 title.TextSize = 12
 title.Parent = frame
 
--- زر التفعيل
-local activateBtn = Instance.new("TextButton")
-activateBtn.Text = "🔓 ACTIVATE INSTANT CLICK"
-activateBtn.Size = UDim2.new(0.9, 0, 0, 35)
-activateBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
-activateBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
-activateBtn.TextColor3 = Color3.new(1, 1, 1)
-activateBtn.Font = Enum.Font.SourceSansBold
-activateBtn.TextSize = 12
-activateBtn.Parent = frame
+-- البحث عن زر الدخول
+local function findEntryButton()
+    return player.PlayerGui:FindFirstChild("Main") and
+           player.PlayerGui.Main:FindFirstChild("Dialogue") and
+           player.PlayerGui.Main.Dialogue:FindFirstChild("Option2")
+end
 
--- زر النقر المتكرر
-local rapidBtn = Instance.new("TextButton")
-rapidBtn.Text = "🔄 RAPID CLICKS (10x)"
-rapidBtn.Size = UDim2.new(0.9, 0, 0, 30)
-rapidBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
-rapidBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 120)
-rapidBtn.TextColor3 = Color3.new(1, 1, 1)
-rapidBtn.Font = Enum.Font.SourceSansBold
-rapidBtn.TextSize = 11
-rapidBtn.Parent = frame
+-- البحث عن زر الشراء
+local function findBuyButton()
+    local path = {
+        "GachaWindow", "HolidayGacha25", "Premium", 
+        "MainGachaUI", "PurchaseFooter", "PreviewButton"
+    }
+    
+    local current = player.PlayerGui
+    
+    for _, folder in ipairs(path) do
+        current = current:FindFirstChild(folder)
+        if not current then return nil end
+    end
+    
+    return current
+end
+
+-- زر فتح المتجر
+local openBtn = Instance.new("TextButton")
+openBtn.Text = "🚪 OPEN GACHA SHOP"
+openBtn.Size = UDim2.new(0.9, 0, 0, 35)
+openBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
+openBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+openBtn.TextColor3 = Color3.new(1, 1, 1)
+openBtn.Font = Enum.Font.SourceSansBold
+openBtn.Parent = frame
+
+-- زر شراء مباشر
+local buyBtn = Instance.new("TextButton")
+buyBtn.Text = "💰 DIRECT PURCHASE"
+buyBtn.Size = UDim2.new(0.9, 0, 0, 35)
+buyBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
+buyBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+buyBtn.TextColor3 = Color3.new(1, 1, 1)
+buyBtn.Font = Enum.Font.SourceSansBold
+buyBtn.Parent = frame
 
 -- النتائج
 local resultBox = Instance.new("TextLabel")
-resultBox.Text = "👉 اضغط ACTIVATE أولاً"
+resultBox.Text = "👉 اضغط OPEN GACHA SHOP"
 resultBox.Size = UDim2.new(0.9, 0, 0, 60)
-resultBox.Position = UDim2.new(0.05, 0, 0.7, 0)
+resultBox.Position = UDim2.new(0.05, 0, 0.75, 0)
 resultBox.BackgroundColor3 = Color3.fromRGB(40, 50, 70)
 resultBox.TextColor3 = Color3.new(1, 1, 1)
 resultBox.TextWrapped = true
@@ -97,147 +119,111 @@ resultBox.Font = Enum.Font.SourceSans
 resultBox.TextSize = 11
 resultBox.Parent = frame
 
--- البحث عن زر Option1
-local function findOption1()
-    return player.PlayerGui:FindFirstChild("Main") and
-           player.PlayerGui.Main:FindFirstChild("Dialogue") and
-           player.PlayerGui.Main.Dialogue:FindFirstChild("Option1")
-end
-
--- دالة تجاوز وقت الانتظار
-local function bypassWaitTime()
-    local button = findOption1()
+-- دالة الضغط على زر
+local function clickButton(button)
+    if not button then return false end
     
-    if not button then
-        resultBox.Text = "❌ Option1 مش موجود"
-        return false
-    end
+    -- طريقة 1: Fire click
+    pcall(function() button:Fire("click") end)
     
-    resultBox.Text = "🔧 جاري تجاوز وقت الانتظار...\n"
-    
-    -- الطريقة 1: البحث عن LocalScripts
-    local foundScript = false
-    
-    for _, script in pairs(button:GetDescendants()) do
-        if script:IsA("LocalScript") then
-            pcall(function()
-                local source = script.Source:lower()
-                if source:find("wait") or source:find("delay") or source:find("cooldown") then
-                    resultBox.Text = resultBox.Text .. "🎯 وجدت: " .. script.Name .. "\n"
-                    
-                    -- تعديل وقت الانتظار
-                    script.Source = script.Source:gsub("wait%(%d+%.?%d*%)", "wait(0)")
-                    script.Source = script.Source:gsub("task%.wait%(%d+%.?%d*%)", "task.wait(0)")
-                    
-                    resultBox.Text = resultBox.Text .. "✅ وقت الانتظار = 0"
-                    foundScript = true
-                end
-            end)
-        end
-    end
-    
-    -- الطريقة 2: تعطيل events
-    if getconnections and not foundScript then
+    -- طريقة 2: استدعاء events
+    if getconnections then
         pcall(function()
             local connections = getconnections(button.MouseButton1Click)
-            
             for _, conn in pairs(connections) do
-                local funcInfo = debug.getinfo(conn.Function)
-                local source = tostring(funcInfo.source):lower()
-                
-                if source:find("wait") or source:find("delay") then
-                    conn:Disable()
-                    resultBox.Text = resultBox.Text .. "⚡ عطلت فحص الوقت\n"
-                    
-                    -- إضافة وظيفة جديدة
-                    button.MouseButton1Click:Connect(function()
-                        resultBox.Text = "⚡ نقرت بدون انتظار!"
-                    end)
-                    
-                    foundScript = true
-                end
+                conn:Fire()
             end
         end)
     end
     
-    if foundScript then
-        resultBox.Text = resultBox.Text .. "\n✅ يمكنك النقر بدون انتظار!"
-        return true
-    else
-        resultBox.Text = resultBox.Text .. "❌ ما لقيت كود انتظار"
-        return false
-    end
-end
-
--- دالة النقر على Option1
-local function clickOption1()
-    local button = findOption1()
-    
-    if not button then
-        resultBox.Text = "❌ زر Option1 مش موجود"
-        return false
+    -- طريقة 3: تغيير مرئي
+    if button:IsA("TextButton") then
+        local original = button.Text
+        button.Text = "⚡..."
+        task.wait(0.1)
+        button.Text = original
     end
     
-    pcall(function()
-        -- طريقة 1: Fire click
-        button:Fire("click")
-        
-        -- طريقة 2: Events
-        if getconnections then
-            local connections = getconnections(button.MouseButton1Click)
-            for _, conn in pairs(connections) do
-                pcall(function() conn:Fire() end)
-            end
-        end
-        
-        -- طريقة 3: Remote مباشر
-        for _, remote in pairs(game:GetDescendants()) do
-            if remote:IsA("RemoteEvent") and remote.Name:find("Option") then
-                pcall(function()
-                    remote:FireServer({
-                        option = 1,
-                        player = player,
-                        instant = true
-                    })
-                end)
-            end
-        end
-        
-        resultBox.Text = "⚡ نقرت على Option1!"
-        return true
-    end)
-    
-    return false
+    return true
 end
 
--- تفعيل الاختراق
-activateBtn.MouseButton1Click:Connect(function()
-    resultBox.Text = "🔓 جاري تفعيل النقر الفوري..."
+-- فتح المتجر
+openBtn.MouseButton1Click:Connect(function()
+    resultBox.Text = "🔍 جاري فتح متجر Gacha..."
     
-    local success = bypassWaitTime()
+    local entryButton = findEntryButton()
+    if not entryButton then
+        resultBox.Text = "❌ زر الدخول مش موجود\nافتح اللعبة أولاً"
+        return
+    end
+    
+    resultBox.Text = resultBox.Text .. "\n✅ وجدت زر الدخول"
+    
+    -- الضغط على زر الدخول
+    local success = clickButton(entryButton)
     
     if success then
-        activateBtn.Text = "✅ INSTANT CLICK ACTIVE"
-        activateBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
-        rapidBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        resultBox.Text = resultBox.Text .. "\n🎯 نقرت على زر الدخول"
+        
+        -- انتظار تحميل المتجر
+        task.wait(1)
+        
+        -- البحث عن زر الشراء بعد فتح المتجر
+        local buyButton = findBuyButton()
+        
+        if buyButton then
+            resultBox.Text = resultBox.Text .. "\n✅ وجدت زر الشراء!\n"
+            resultBox.Text = resultBox.Text .. "📍 " .. buyButton.Name
+            
+            -- تغيير زر الشراء المباشر
+            buyBtn.Text = "💰 BUY NOW (جاهز)"
+            buyBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+        else
+            resultBox.Text = resultBox.Text .. "\n❌ زر الشراء مخفي"
+        end
     else
-        activateBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        resultBox.Text = "❌ فشل فتح المتجر"
     end
 end)
 
--- نقر متكرر
-rapidBtn.MouseButton1Click:Connect(function()
-    resultBox.Text = "🔄 جاري النقر 10 مرات...\n"
+-- شراء مباشر
+buyBtn.MouseButton1Click:Connect(function()
+    resultBox.Text = "💸 جاري محاولة شراء..."
     
-    spawn(function()
-        for i = 1, 10 do
-            clickOption1()
-            resultBox.Text = resultBox.Text .. i .. ". نقرت\n"
-            task.wait(0.1) -- تأخير قصير
+    -- المحاولة 1: استخدام زر الشراء المباشر
+    local buyButton = findBuyButton()
+    if buyButton then
+        clickButton(buyButton)
+        resultBox.Text = resultBox.Text .. "\n✅ استخدمت زر الشراء"
+    else
+        resultBox.Text = resultBox.Text .. "\n❌ زر الشراء مخفي"
+    end
+    
+    -- المحاولة 2: استخدام RemoteEvents
+    task.wait(0.5)
+    
+    local shopRemotes = {
+        "Shop",
+        "SalesEvent", 
+        "ServerSideBulkPurchaseEvent"
+    }
+    
+    for _, remoteName in ipairs(shopRemotes) do
+        local remote = game:GetService("ReplicatedStorage").Remotes:FindFirstChild(remoteName)
+        if remote and remote:IsA("RemoteEvent") then
+            pcall(function()
+                remote:FireServer({
+                    product = "HolidayGacha25",
+                    action = "purchase",
+                    player = player,
+                    timestamp = os.time()
+                })
+                resultBox.Text = resultBox.Text .. "\n📤 أرسلت عبر: " .. remoteName
+            end)
         end
-        
-        resultBox.Text = resultBox.Text .. "\n✅ انتهى النقر 10 مرات!"
-    end)
+    end
+    
+    resultBox.Text = resultBox.Text .. "\n✅ انتهت محاولات الشراء"
 end)
 
 -- زر إغلاق
@@ -255,20 +241,29 @@ end)
 
 -- فحص تلقائي
 spawn(function()
-    task.wait(1)
+    task.wait(2)
     
-    local button = findOption1()
-    if button then
-        resultBox.Text = "✅ زر Option1 موجود!\n"
-        resultBox.Text = resultBox.Text .. "👉 اضغط ACTIVATE"
+    resultBox.Text = "🔍 فحص تلقائي..."
+    
+    local entryButton = findEntryButton()
+    if entryButton then
+        resultBox.Text = resultBox.Text .. "\n✅ زر الدخول موجود"
     else
-        resultBox.Text = "❌ زر Option1 مش موجود\n"
-        resultBox.Text = resultBox.Text .. "🔍 تأكد من فتح اللعبة"
+        resultBox.Text = resultBox.Text .. "\n❌ زر الدخول مش موجود"
+    end
+    
+    local buyButton = findBuyButton()
+    if buyButton then
+        resultBox.Text = resultBox.Text .. "\n✅ زر الشراء موجود"
+        buyBtn.Text = "💰 BUY NOW (جاهز)"
+        buyBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+    else
+        resultBox.Text = resultBox.Text .. "\n❌ زر الشراء مخفي/مش موجود"
     end
 end)
 
 print("========================================")
-print("⚡ INSTANT OPTION1 CLICK LOADED")
-print("🎯 Bypasses wait time between clicks")
+print("🎮 GACHA SHOP ACCESS LOADED")
+print("🎯 Opens hidden Gacha shop")
 print("⚠️  FOR EDUCATIONAL PURPOSES ONLY")
 print("========================================")
