@@ -1,5 +1,5 @@
--- 🎯 ALTERNATIVE BUTTON CLICKER
--- Just a helper button, no hacking
+-- 🎮 GACHA SHOP ACCESS TOOL
+-- ⚠️ FOR EDUCATIONAL PURPOSES ONLY
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -7,24 +7,24 @@ local CoreGui = game:GetService("CoreGui")
 
 -- تنظيف
 for _, gui in pairs(CoreGui:GetChildren()) do
-    if gui.Name == "AltButtonClicker" then
+    if gui.Name == "GachaAccess" then
         gui:Destroy()
     end
 end
 
 -- واجهة صغيرة
 local gui = Instance.new("ScreenGui")
-gui.Name = "AltButtonClicker"
+gui.Name = "GachaAccess"
 gui.Parent = CoreGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 180, 0, 150)
+frame.Size = UDim2.new(0, 200, 0, 200)
 frame.Position = UDim2.new(0.1, 0, 0.3, 0)
-frame.BackgroundColor3 = Color3.fromRGB(40, 50, 70)
+frame.BackgroundColor3 = Color3.fromRGB(50, 60, 80)
 frame.BorderSizePixel = 0
 frame.Parent = gui
 
--- 🔥 تحريك بالإصبع
+-- تحريك بالإصبع
 local dragging = false
 local dragStart, startPos
 
@@ -55,16 +55,23 @@ frame.InputChanged:Connect(function(input)
 end)
 
 local title = Instance.new("TextLabel")
-title.Text = "🎮 ALT BUTTON (اسحبني)"
+title.Text = "🎮 GACHA ACCESS (اسحبني)"
 title.Size = UDim2.new(1, 0, 0, 25)
-title.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+title.BackgroundColor3 = Color3.fromRGB(150, 50, 200)
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Font = Enum.Font.SourceSansBold
 title.TextSize = 12
 title.Parent = frame
 
--- البحث عن الزر الأصلي
-local function findOriginalButton()
+-- البحث عن زر الدخول
+local function findEntryButton()
+    return player.PlayerGui:FindFirstChild("Main") and
+           player.PlayerGui.Main:FindFirstChild("Dialogue") and
+           player.PlayerGui.Main.Dialogue:FindFirstChild("Option2")
+end
+
+-- البحث عن زر الشراء
+local function findBuyButton()
     local path = {
         "GachaWindow", "HolidayGacha25", "Premium", 
         "MainGachaUI", "PurchaseFooter", "PreviewButton"
@@ -74,104 +81,149 @@ local function findOriginalButton()
     
     for _, folder in ipairs(path) do
         current = current:FindFirstChild(folder)
-        if not current then
-            return nil
-        end
+        if not current then return nil end
     end
     
     return current
 end
 
--- زر بديل كبير
-local altButton = Instance.new("TextButton")
-altButton.Text = "🔄 CLICK PREVIEW BUTTON"
-altButton.Size = UDim2.new(0.9, 0, 0, 60)
-altButton.Position = UDim2.new(0.05, 0, 0.3, 0)
-altButton.BackgroundColor3 = Color3.fromRGB(0, 180, 120)
-altButton.TextColor3 = Color3.new(1, 1, 1)
-altButton.Font = Enum.Font.SourceSansBold
-altButton.TextSize = 13
-altButton.Parent = frame
+-- زر فتح المتجر
+local openBtn = Instance.new("TextButton")
+openBtn.Text = "🚪 OPEN GACHA SHOP"
+openBtn.Size = UDim2.new(0.9, 0, 0, 35)
+openBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
+openBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+openBtn.TextColor3 = Color3.new(1, 1, 1)
+openBtn.Font = Enum.Font.SourceSansBold
+openBtn.Parent = frame
 
--- حالة الزر
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Text = "👉 اضغط الزر الأخضر"
-statusLabel.Size = UDim2.new(0.9, 0, 0, 40)
-statusLabel.Position = UDim2.new(0.05, 0, 0.8, 0)
-statusLabel.BackgroundColor3 = Color3.fromRGB(50, 60, 80)
-statusLabel.TextColor3 = Color3.new(1, 1, 1)
-statusLabel.TextWrapped = true
-statusLabel.Font = Enum.Font.SourceSans
-statusLabel.TextSize = 11
-statusLabel.Parent = frame
+-- زر شراء مباشر
+local buyBtn = Instance.new("TextButton")
+buyBtn.Text = "💰 DIRECT PURCHASE"
+buyBtn.Size = UDim2.new(0.9, 0, 0, 35)
+buyBtn.Position = UDim2.new(0.05, 0, 0.45, 0)
+buyBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+buyBtn.TextColor3 = Color3.new(1, 1, 1)
+buyBtn.Font = Enum.Font.SourceSansBold
+buyBtn.Parent = frame
 
--- دالة النقر على الزر الأصلي
-local function clickOriginalButton()
-    local originalButton = findOriginalButton()
+-- النتائج
+local resultBox = Instance.new("TextLabel")
+resultBox.Text = "👉 اضغط OPEN GACHA SHOP"
+resultBox.Size = UDim2.new(0.9, 0, 0, 60)
+resultBox.Position = UDim2.new(0.05, 0, 0.75, 0)
+resultBox.BackgroundColor3 = Color3.fromRGB(40, 50, 70)
+resultBox.TextColor3 = Color3.new(1, 1, 1)
+resultBox.TextWrapped = true
+resultBox.Font = Enum.Font.SourceSans
+resultBox.TextSize = 11
+resultBox.Parent = frame
+
+-- دالة الضغط على زر
+local function clickButton(button)
+    if not button then return false end
     
-    if not originalButton then
-        statusLabel.Text = "❌ الزر الأصلي مش موجود\nافتح نافذة Gacha"
-        return false
+    -- طريقة 1: Fire click
+    pcall(function() button:Fire("click") end)
+    
+    -- طريقة 2: استدعاء events
+    if getconnections then
+        pcall(function()
+            local connections = getconnections(button.MouseButton1Click)
+            for _, conn in pairs(connections) do
+                conn:Fire()
+            end
+        end)
     end
     
-    statusLabel.Text = "🎯 جاري النقر على الزر الأصلي..."
+    -- طريقة 3: تغيير مرئي
+    if button:IsA("TextButton") then
+        local original = button.Text
+        button.Text = "⚡..."
+        task.wait(0.1)
+        button.Text = original
+    end
     
-    -- طريقة 1: Fire click event
-    pcall(function()
-        originalButton:Fire("click")
-        statusLabel.Text = statusLabel.Text .. "\n✅ استخدمت Fire"
-    end)
-    
-    -- طريقة 2: استدعاء MouseButton1Click events
-    pcall(function()
-        if getconnections then
-            local connections = getconnections(originalButton.MouseButton1Click)
-            for _, conn in pairs(connections) do
-                pcall(function()
-                    conn:Fire()
-                end)
-            end
-            statusLabel.Text = statusLabel.Text .. "\n✅ استدعيت Events"
-        end
-    end)
-    
-    -- طريقة 3: محاكاة النقر
-    pcall(function()
-        if originalButton:IsA("TextButton") then
-            -- حفظ النص الأصلي
-            local originalText = originalButton.Text
-            
-            -- تغيير مؤقت للإيهام بالنقر
-            originalButton.Text = "⚡..."
-            task.wait(0.05)
-            originalButton.Text = originalText
-            
-            statusLabel.Text = statusLabel.Text .. "\n✅ محاكاة نقر"
-        end
-    end)
-    
-    statusLabel.Text = statusLabel.Text .. "\n✅ تم النقر!"
     return true
 end
 
--- النقر على الزر البديل
-altButton.MouseButton1Click:Connect(function()
-    statusLabel.Text = "🎮 جاري تشغيل الزر الأصلي..."
+-- فتح المتجر
+openBtn.MouseButton1Click:Connect(function()
+    resultBox.Text = "🔍 جاري فتح متجر Gacha..."
     
-    local success = clickOriginalButton()
+    local entryButton = findEntryButton()
+    if not entryButton then
+        resultBox.Text = "❌ زر الدخول مش موجود\nافتح اللعبة أولاً"
+        return
+    end
+    
+    resultBox.Text = resultBox.Text .. "\n✅ وجدت زر الدخول"
+    
+    -- الضغط على زر الدخول
+    local success = clickButton(entryButton)
     
     if success then
-        -- تأثير مرئي عند النجاح
-        altButton.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
+        resultBox.Text = resultBox.Text .. "\n🎯 نقرت على زر الدخول"
         
-        -- إرجاع اللون بعد ثانية
-        task.wait(0.2)
-        altButton.BackgroundColor3 = Color3.fromRGB(0, 180, 120)
+        -- انتظار تحميل المتجر
+        task.wait(1)
+        
+        -- البحث عن زر الشراء بعد فتح المتجر
+        local buyButton = findBuyButton()
+        
+        if buyButton then
+            resultBox.Text = resultBox.Text .. "\n✅ وجدت زر الشراء!\n"
+            resultBox.Text = resultBox.Text .. "📍 " .. buyButton.Name
+            
+            -- تغيير زر الشراء المباشر
+            buyBtn.Text = "💰 BUY NOW (جاهز)"
+            buyBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+        else
+            resultBox.Text = resultBox.Text .. "\n❌ زر الشراء مخفي"
+        end
     else
-        altButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-        task.wait(0.5)
-        altButton.BackgroundColor3 = Color3.fromRGB(0, 180, 120)
+        resultBox.Text = "❌ فشل فتح المتجر"
     end
+end)
+
+-- شراء مباشر
+buyBtn.MouseButton1Click:Connect(function()
+    resultBox.Text = "💸 جاري محاولة شراء..."
+    
+    -- المحاولة 1: استخدام زر الشراء المباشر
+    local buyButton = findBuyButton()
+    if buyButton then
+        clickButton(buyButton)
+        resultBox.Text = resultBox.Text .. "\n✅ استخدمت زر الشراء"
+    else
+        resultBox.Text = resultBox.Text .. "\n❌ زر الشراء مخفي"
+    end
+    
+    -- المحاولة 2: استخدام RemoteEvents
+    task.wait(0.5)
+    
+    local shopRemotes = {
+        "Shop",
+        "SalesEvent", 
+        "ServerSideBulkPurchaseEvent"
+    }
+    
+    for _, remoteName in ipairs(shopRemotes) do
+        local remote = game:GetService("ReplicatedStorage").Remotes:FindFirstChild(remoteName)
+        if remote and remote:IsA("RemoteEvent") then
+            pcall(function()
+                remote:FireServer({
+                    product = "HolidayGacha25",
+                    action = "purchase",
+                    player = player,
+                    timestamp = os.time()
+                })
+                resultBox.Text = resultBox.Text .. "\n📤 أرسلت عبر: " .. remoteName
+            end)
+        end
+    end
+    
+    resultBox.Text = resultBox.Text .. "\n✅ انتهت محاولات الشراء"
 end)
 
 -- زر إغلاق
@@ -187,48 +239,31 @@ closeBtn.MouseButton1Click:Connect(function()
     gui:Destroy()
 end)
 
--- اكتشاف تلقائي للزر الأصلي
+-- فحص تلقائي
 spawn(function()
-    task.wait(1)
+    task.wait(2)
     
-    local originalButton = findOriginalButton()
+    resultBox.Text = "🔍 فحص تلقائي..."
     
-    if originalButton then
-        statusLabel.Text = "✅ الزر الأصلي موجود!\n"
-        statusLabel.Text = statusLabel.Text .. "📍 " .. originalButton.Name .. "\n"
-        statusLabel.Text = statusLabel.Text .. "👉 اضغط الزر الأخضر"
+    local entryButton = findEntryButton()
+    if entryButton then
+        resultBox.Text = resultBox.Text .. "\n✅ زر الدخول موجود"
     else
-        statusLabel.Text = "❌ افتح نافذة Gacha\nلرؤية الزر الأصلي"
+        resultBox.Text = resultBox.Text .. "\n❌ زر الدخول مش موجود"
+    end
+    
+    local buyButton = findBuyButton()
+    if buyButton then
+        resultBox.Text = resultBox.Text .. "\n✅ زر الشراء موجود"
+        buyBtn.Text = "💰 BUY NOW (جاهز)"
+        buyBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+    else
+        resultBox.Text = resultBox.Text .. "\n❌ زر الشراء مخفي/مش موجود"
     end
 end)
 
--- زر النقر التلقائي
-local autoClickBtn = Instance.new("TextButton")
-autoClickBtn.Text = "🔄 AUTO CLICK (10x)"
-autoClickBtn.Size = UDim2.new(0.9, 0, 0, 25)
-autoClickBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
-autoClickBtn.BackgroundColor3 = Color3.fromRGB(100, 100, 150)
-autoClickBtn.TextColor3 = Color3.new(1, 1, 1)
-autoClickBtn.Font = Enum.Font.SourceSans
-autoClickBtn.TextSize = 10
-autoClickBtn.Parent = frame
-
-autoClickBtn.MouseButton1Click:Connect(function()
-    statusLabel.Text = "🔄 جاري النقر 10 مرات..."
-    
-    spawn(function()
-        for i = 1, 10 do
-            clickOriginalButton()
-            statusLabel.Text = "🔄 " .. i .. "/10 مرات"
-            task.wait(0.3) -- تأخير بين النقرات
-        end
-        
-        statusLabel.Text = "✅ انتهى النقر 10 مرات!"
-    end)
-end)
-
 print("========================================")
-print("🎮 ALTERNATIVE BUTTON CLICKER LOADED")
-print("🎯 Clicks PreviewButton for you")
-print("⚠️  Just a helper tool")
+print("🎮 GACHA SHOP ACCESS LOADED")
+print("🎯 Opens hidden Gacha shop")
+print("⚠️  FOR EDUCATIONAL PURPOSES ONLY")
 print("========================================")
